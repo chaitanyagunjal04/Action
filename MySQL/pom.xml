@@ -9,7 +9,7 @@
         <maven.compiler.source>22</maven.compiler.source>
         <maven.compiler.target>22</maven.compiler.target>
         <exec.mainClass>org.mysql.demo.MySQL</exec.mainClass>
-    </properties>
+    </properties> 
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
