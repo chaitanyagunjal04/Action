@@ -50,6 +50,7 @@ jobs:
             fi
           done
           echo "Changed Applications: $changed_apps"
+          echo "applications=$changed_apps" >> $GITHUB_ENV
           echo "::set-output name=applications::$changed_apps"
 
       - name: Display filtered applications
