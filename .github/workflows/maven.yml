@@ -16,7 +16,7 @@ on:
 
 jobs:
 
-  Build:
+  Application Changed:
     runs-on: ubuntu-latest
     outputs:
       applications: ${{ steps.filter-apps.outputs.applications }}
@@ -32,7 +32,7 @@ jobs:
           git fetch origin
           files=$(git diff HEAD~1 HEAD --name-only)
           echo "Files -> $files"
-          echo "changed_files=$files"
+          echo "changed_files=$files" >> $GITHUB_ENV
 
       - name: Load applications list
         id: load-apps
@@ -44,17 +44,32 @@ jobs:
       - name: Filter changed applications
         id: filter-apps
         run: |
-          changed_files=$(echo "${{ env.changed_files }}" | tr ' ' '\n')
-          apps_to_build=$(echo "$changed_files" | grep -E "$(echo $apps | tr ',' '|')" | sed -E 's|/.*||' | sort -u)
-          applications_list=$(echo $apps_to_build | jq -cR 'split("\n") | map(select(. != ""))')
-          if [ -z "$applications_list" ]; then
-            applications_list="[]"
-          fi
-          echo "Filtered applications: $applications_list"
-          echo "::set-output name=applications::$applications_list"
+          changed_apps=""
+          for app in $(echo $apps | tr ',' ' '); do
+            if echo "$changed_files" | grep -q "$app/"; then
+              changed_apps="$changed_apps,$app"
+            fi
+          done
+          changed_apps=$(echo $changed_apps | sed 's/^,//')
+          echo "Changed Applications: $changed_apps"
+          echo "::set-output name=applications::$changed_apps"
 
-      - name: Debug applications output
+      - name: Display filtered applications
+        if: ${{ steps.filter-apps.outputs.applications != '' }}
+        run: echo "Applications to Build: ${{ steps.filter-apps.outputs.applications }}"
+      
+  Build-App:
+    needs: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        application: ${{ fromJson(needs.Build.outputs.applications) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Build Maven Application
         run: |
-          echo "Applications output: '${{ steps.filter-apps.outputs.applications }}'" 
-
-
+          echo "Building application: ${{ matrix.application }}"
+          cd ${{ matrix.application }}
+          mvn clean install
