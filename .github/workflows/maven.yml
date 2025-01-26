@@ -49,9 +49,16 @@ jobs:
               changed_apps=$(echo "$changed_apps" | jq --arg app "$app" '. + [$app]')
             fi
           done
+
+          # Minify JSON to avoid whitespace issues
+          changed_apps=$(echo "$changed_apps" | jq -c '.')
+
           echo "Changed Applications: $changed_apps"
+
+          # Write outputs using the correct syntax
           echo "applications=$changed_apps" >> $GITHUB_ENV
           echo "applications=$changed_apps" >> $GITHUB_OUTPUT
+
 
       - name: Display filtered applications
         if: ${{ steps.filter-apps.outputs.applications != '[]' }}
