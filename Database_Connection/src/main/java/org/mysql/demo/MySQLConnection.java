@@ -6,7 +6,7 @@ class MySqlConnection {
 
     public Connection getConnection() {
         String jdbcUrl = "jdbc:mysql://localhost:3306/mydatabase";
-        String username = "root";
+        String username = "root"; 
         String password = "Vishnu@50";
 
         Connection connection = null;
