@@ -15,7 +15,7 @@ on:
     branches: [ "test" ]
 
 jobs:
-  build:
+  build111:
 
     runs-on: ubuntu-latest
 
@@ -30,38 +30,45 @@ jobs:
     - name: Build with Maven
       run: mvn -f MySQL/pom.xml install
 
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 2
+  Build:
+    runs-on: ubuntu-latest
+    outputs:
+      applications: ${{ steps.filter-apps.outputs.applications }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
-    - name: Get files changed
-      id: get-changed-files
-      run: |
-        git fetch origin
-        files=$(git diff HEAD~1 HEAD --name-only)
-        echo "Files -> $files"
-        echo "changed_files=$files" >> $GITHUB_ENV
+      - name: Get files changed
+        id: get-changed-files
+        run: |
+          git fetch origin
+          files=$(git diff HEAD~1 HEAD --name-only)
+          echo "Files -> $files"
+          echo "changed_files=$files"
 
-    - name: Load applications list
-      id: load-apps
-      run: |
-         apps=$(jq -r '.applications[]' .github/workflows/applications.json | tr '\n' ',' | sed 's/,$//')
-         echo "Applications: $apps"
-         echo "apps=$apps" >> $GITHUB_ENV
+      - name: Load applications list
+        id: load-apps
+        run: |
+          apps=$(jq -r '.applications[]' .github/workflows/applications.json | tr '\n' ',' | sed 's/,$//')
+          echo "Applications: $apps"
+          echo "apps=$apps" >> $GITHUB_ENV
 
-    - name: Filter changed applications
-      id: filter-apps
-      run: |
-         changed_files=$(echo "${{ env.changed_files }}" | tr ' ' '\n')
-         apps_to_build=$(echo "$changed_files" | grep -E "$(echo $apps | tr ',' '|')" | sed -E 's|/.*||' | sort -u)
-         applications_list=$(echo $apps_to_build | jq -cR 'split("\n") | map(select(. != ""))')
-         if [ -z "$applications_list" ]; then
-           applications_list="[]"
-         fi
-         echo "Filtered applications: $applications_list"
-         echo "::set-output name=applications::$applications_list"
+      - name: Filter changed applications
+        id: filter-apps
+        run: |
+          changed_files=$(echo "${{ env.changed_files }}" | tr ' ' '\n')
+          apps_to_build=$(echo "$changed_files" | grep -E "$(echo $apps | tr ',' '|')" | sed -E 's|/.*||' | sort -u)
+          applications_list=$(echo $apps_to_build | jq -cR 'split("\n") | map(select(. != ""))')
+          if [ -z "$applications_list" ]; then
+            applications_list="[]"
+          fi
+          echo "Filtered applications: $applications_list"
+          echo "::set-output name=applications::$applications_list"
 
-    - name: Debug applications output
-      run: |
-         echo "Applications output: '${{ steps.filter-apps.outputs.applications }}'"
+      - name: Debug applications output
+        run: |
+          echo "Applications output: '${{ steps.filter-apps.outputs.applications }}'"
+
+
