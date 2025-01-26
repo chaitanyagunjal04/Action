@@ -10,7 +10,7 @@ class MySqlConnection {
         String password = "Vishnu@50";
 
         Connection connection = null;
- 
+  
         try {
             // Establishing a connection
             connection = DriverManager.getConnection(jdbcUrl, username, password);
