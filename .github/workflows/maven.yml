@@ -15,7 +15,6 @@ on:
     branches: [ "test" ]
 
 jobs:
-
   ApplicationChanged:
     runs-on: ubuntu-latest
     outputs:
@@ -30,15 +29,13 @@ jobs:
         id: get-changed-files
         run: |
           git fetch origin
-          files=$(git diff HEAD~1 HEAD --name-only)
-          echo "Files -> $files"
+          files=$(git diff $(git merge-base origin/test HEAD) HEAD --name-only)
           echo "changed_files=$files" >> $GITHUB_ENV
 
       - name: Load applications list
         id: load-apps
         run: |
           apps=$(jq -r '.applications[]' .github/workflows/applications.json | tr '\n' ',' | sed 's/,$//')
-          echo "Applications: $apps"
           echo "apps=$apps" >> $GITHUB_ENV
 
       - name: Filter changed applications
@@ -51,26 +48,27 @@ jobs:
             fi
           done
           changed_apps=$(echo $changed_apps | sed 's/^,//')
-          echo "Changed Applications: $changed_apps"
-          echo "::set-output name=applications::$changed_apps"
+          echo "applications=$changed_apps" >> $GITHUB_ENV
 
       - name: Display filtered applications
-        if: ${{ steps.filter-apps.outputs.applications != '' }}
+        if: ${{ env.applications != '' }}
         run: |
-             echo "Applications to Build: ${{ steps.filter-apps.outputs.applications }}"
-      
+          echo "Applications to Build: ${{ env.applications }}"
+
   Build-App:
     needs: ApplicationChanged
     runs-on: ubuntu-latest
+    if: ${{ needs.ApplicationChanged.outputs.applications != '' }}
     strategy:
       matrix:
-        application: ${{ fromJson(needs.Build.outputs.applications) }}
+        application: ${{ fromJson(needs.ApplicationChanged.outputs.applications) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Build Maven Application
         run: |
           echo "Building application: ${{ matrix.application }}"
           cd ${{ matrix.application }}
           mvn clean install
+

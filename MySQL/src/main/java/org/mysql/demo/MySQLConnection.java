@@ -11,7 +11,7 @@ class MySqlConnection {
 
         Connection connection = null;
  
-        try { 
+        try {
             // Establishing a connection
             connection = DriverManager.getConnection(jdbcUrl, username, password);
             System.out.println("Connection established successfully.");
