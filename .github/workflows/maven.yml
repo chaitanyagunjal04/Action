@@ -46,12 +46,12 @@ jobs:
           changed_apps="[]"
           for app in $(echo $apps | tr ',' ' '); do
             if echo "$changed_files" | grep -q "$app/"; then
-              changed_apps=$(echo $changed_apps | jq --arg app "$app" '. + [$app]')
+              changed_apps=$(echo "$changed_apps" | jq --arg app "$app" '. + [$app]')
             fi
           done
           echo "Changed Applications: $changed_apps"
           echo "applications=$changed_apps" >> $GITHUB_ENV
-          echo "::set-output name=applications::$changed_apps"
+          echo "applications=$changed_apps" >> $GITHUB_OUTPUT
 
       - name: Display filtered applications
         if: ${{ steps.filter-apps.outputs.applications != '[]' }}

@@ -26,6 +26,6 @@ class MySqlConnection {
             System.out.println("Failed to establish connection.");
         } 
     return connection;
-    } 
+    }  
 }
 
