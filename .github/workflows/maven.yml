@@ -55,6 +55,6 @@ jobs:
 
       - name: Debug applications output
         run: |
-          echo "Applications output: '${{ steps.filter-apps.outputs.applications }}'"
+          echo "Applications output: '${{ steps.filter-apps.outputs.applications }}'" 
 
 
