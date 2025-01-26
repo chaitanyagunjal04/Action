@@ -1,5 +1,6 @@
 {
   "applications": [
-    "MySQL"
+    "MySQL",
+    "Database_Connection"
   ]
 }
