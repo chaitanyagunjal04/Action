@@ -16,7 +16,7 @@ on:
 
 jobs:
 
-  Application Changed:
+  ApplicationChanged:
     runs-on: ubuntu-latest
     outputs:
       applications: ${{ steps.filter-apps.outputs.applications }}
@@ -56,10 +56,11 @@ jobs:
 
       - name: Display filtered applications
         if: ${{ steps.filter-apps.outputs.applications != '' }}
-        run: echo "Applications to Build: ${{ steps.filter-apps.outputs.applications }}"
+        run: |
+             echo "Applications to Build: ${{ steps.filter-apps.outputs.applications }}"
       
   Build-App:
-    needs: Build
+    needs: ApplicationChanged
     runs-on: ubuntu-latest
     strategy:
       matrix:
